@@ -13,6 +13,11 @@ LDSCRIPTS += $(AM_HOME)/scripts/linker.ld
 LDFLAGS   += --defsym=_pmem_start=0x80000000 --defsym=_entry_offset=0x0
 LDFLAGS   += --gc-sections -e _start
 NEMUFLAGS += -l $(shell dirname $(IMAGE).elf)/nemu-log.txt
+# NEMUFLAGS += -l $(shell dirname $(IMAGE).elf)/mtrace-log.txt
+## route of mtrace-log is defined inline.
+# NEMUFLAGS += -e /home/yequdesu/repos/ics2024/nemu/build/needed-elf.elf
+NEMUFLAGS += -e $(IMAGE).elf
+
 
 MAINARGS_MAX_LEN = 64
 MAINARGS_PLACEHOLDER = the_insert-arg_rule_in_Makefile_will_insert_mainargs_here
