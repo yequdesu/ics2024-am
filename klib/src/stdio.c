@@ -11,75 +11,101 @@ int printf(const char *fmt, ...) {
   int cnt = 0;
   for(; *fmt != '\0'; fmt++) {
     if(*fmt != '%') { putch(*fmt); cnt++; continue; }
-  }
-  fmt++;
-  switch(*fmt) {
-    case 'd' : {
-      int n = va_arg(ap, int);
-      if(n < 0) { putch('-'); cnt++; n *= -1;}
-      if(n == 0) {putch('0'); cnt++;}
-      else {
-        char buf[16];
-        int i = 0;
-        while(n > 0) {buf[i++] = '0' + (n % 10); n /= 10;}
-        cnt += i;
-        while(i > 0) putch(buf[--i]);
+    fmt++;
+    if(*fmt == '\0') break;
+    switch(*fmt) {
+      case 'd': {
+        int n = va_arg(ap, int);
+        if(n < 0) { putch('-'); cnt++; n = -n; }
+        if(n == 0) { putch('0'); cnt++; }
+        else {
+          char buf[16];
+          int i = 0;
+          while(n > 0) {buf[i++] = '0' + (n % 10); n /= 10;}
+          cnt += i;
+          while(i > 0) putch(buf[--i]);
+        }
+        break;
       }
-      break;
+      case 's': {
+        char *str = va_arg(ap, char*);
+        while(*str) {putch(*str++); cnt++;}
+        break;
+      }
+      case 'c': {
+        char c = (char)va_arg(ap, int);
+        putch(c);
+        cnt++;
+        break;
+      }
+      case '%': {
+        putch('%');
+        cnt++;
+        break;
+      }
+      default: 
+        putch('%');
+        putch(*fmt);
+        cnt += 2;
+        break;
     }
-    case 's' : {
-      char *str = va_arg(ap, char*);
-      while(*str) {putch(*str++); cnt++;}
-      break;
-    }
-    case 'c' : {
-      char c = (char)va_arg(ap, int);
-      putch(c);
-      cnt++;
-      break;
-    }
-    default : panic("Unknown kind of function printf"); break;
   }
-  return 0;
+  va_end(ap);
+  return cnt;
   // panic("Not implemented");
 }
 
 int vsprintf(char *out, const char *fmt, va_list ap) {
+#ifdef __TEST__
+  printf("kilb: stdio: vsprintf\n");
+#endif
   int cnt = 0;
-    for(; *fmt != '\0'; fmt++) {
-      if(*fmt != '%') { *out++ = *fmt; cnt++; continue; }
-      fmt++;
-      switch(*fmt) {
-        case 'd': {
-          int n = va_arg(ap, int);
-          if(n < 0) { *out++ = '-'; cnt++; n = -n;}
-          if(n == 0) {*out++ = '0'; cnt++;}
-          else {
-            char buf[16];int i = 0;
-            while(n > 0) {buf[i++] = '0' + (n % 10); n /= 10;}
-            cnt += i;
-            while(i > 0) {*out++ = buf[--i];}
-          }
-          break;
+  for(; *fmt != '\0'; fmt++) {
+    if(*fmt != '%') { *out++ = *fmt; cnt++; continue; }
+    fmt++;
+    if(*fmt == '\0') break;
+    switch(*fmt) {
+      case 'd': {
+        int n = va_arg(ap, int);
+        if(n < 0) { *out++ = '-'; cnt++; n = -n;}
+        if(n == 0) {*out++ = '0'; cnt++;}
+        else {
+          char buf[16];int i = 0;
+          while(n > 0) {buf[i++] = '0' + (n % 10); n /= 10;}
+          cnt += i;
+          while(i > 0) {*out++ = buf[--i];}
         }
-        case 's': {
-          char *str = va_arg(ap, char*);
-          while(*str) {*out++ = *str++; cnt++;}
-          break;
-        }
-        case 'c': {
-          char c = (char)va_arg(ap, int);*out++ = c;cnt++;
-          break;
-        }
-        default : panic("Unknown kind of function printf"); break;
+        break;
       }
+      case 's': {
+        char *str = va_arg(ap, char*);
+        while(*str) {*out++ = *str++; cnt++;}
+        break;
+      }
+      case 'c': {
+        char c = (char)va_arg(ap, int);*out++ = c;cnt++;
+        break;
+      }
+      case '%': {
+        *out++ = '%'; cnt++;
+        break;
+      }
+      default: 
+        *out++ = '%';
+        *out++ = *fmt;
+        cnt += 2;
+        break;
     }
-    *out = '\0';
-    return cnt;
+  }
+  *out = '\0';
+  return cnt;
   // panic("Not implemented");
 }
 
 int sprintf(char *out, const char *fmt, ...) {
+#ifdef __TEST__
+  printf("kilb: stdio: sprintf\n");
+#endif
   va_list ap;
   va_start(ap, fmt);
   int cnt = vsprintf(out, fmt, ap);
@@ -89,6 +115,9 @@ int sprintf(char *out, const char *fmt, ...) {
 }
 
 int snprintf(char *out, size_t n, const char *fmt, ...) {
+#ifdef __TEST__
+  printf("kilb: stdio: printf\n");
+#endif
   va_list ap;
   va_start(ap, fmt);
   int result = vsnprintf(out, n, fmt, ap);
@@ -98,6 +127,9 @@ int snprintf(char *out, size_t n, const char *fmt, ...) {
 }
   
 int vsnprintf(char *out, size_t n, const char *fmt, va_list ap) {
+#ifdef __TEST__
+  printf("kilb: stdio: vsnprintf\n");
+#endif
   if (n == 0) return 0;
   va_list ap_len;
   va_copy(ap_len, ap);

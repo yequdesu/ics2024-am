@@ -5,6 +5,9 @@
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 
 size_t strlen(const char *s) {
+#ifdef __TEST__
+  printf("kilb: string: strlen\n");
+#endif
   size_t cnt = 0;
   while(*s != '\0') { cnt++; }
   return cnt;
@@ -12,6 +15,9 @@ size_t strlen(const char *s) {
 }
 
 char *strcpy(char *dst, const char *src) {
+#ifdef __TEST__
+  printf("kilb: string: strcpy\n");
+#endif
   char *ptr = dst;
   while ((*ptr++ = *src++) != '\0') {}
   return dst;
@@ -19,6 +25,9 @@ char *strcpy(char *dst, const char *src) {
 }
 
 char *strncpy(char *dst, const char *src, size_t n) {
+#ifdef __TEST__
+  printf("kilb: string: strncpy\n");
+#endif
   char *d = dst;
   while (n > 0 && *src != '\0') { *d++ = *src++; n--; }
   while (n > 0) { *d++ = '\0'; n--; }
@@ -27,6 +36,9 @@ char *strncpy(char *dst, const char *src, size_t n) {
 }
 
 char *strcat(char *dst, const char *src) {
+#ifdef __TEST__
+  printf("kilb: string: strcat\n");
+#endif
   char *ptr = dst;
   while (*ptr != '\0') { ptr++; }
   while (*src != '\0') { *ptr++ = *src++; }
@@ -36,6 +48,9 @@ char *strcat(char *dst, const char *src) {
 }
 
 int strcmp(const char *s1, const char *s2) {
+#ifdef __TEST__
+  printf("kilb: string: strcmp\n");
+#endif
   while (*s1 && (*s1 == *s2)) {
     s1++; s2++;
   }
@@ -44,6 +59,9 @@ int strcmp(const char *s1, const char *s2) {
 }
 
 int strncmp(const char *s1, const char *s2, size_t n) {
+#ifdef __TEST__
+  printf("kilb: string: strncmp\n");
+#endif
     if (n == 0) return 0;
     const unsigned char *p1 = (const unsigned char *)s1;
     const unsigned char *p2 = (const unsigned char *)s2;
@@ -58,6 +76,9 @@ int strncmp(const char *s1, const char *s2, size_t n) {
 
 
 void *memset(void *s, int c, size_t n) {
+#ifdef __TEST__
+  printf("kilb: string: memset\n");
+#endif
   unsigned char *ptr = (unsigned char *)s;
   unsigned char value = (unsigned char)c;
   for (size_t i = 0; i < n; i++) {ptr[i] = value;}
@@ -66,6 +87,9 @@ void *memset(void *s, int c, size_t n) {
 }
 
 void *memmove(void *dst, const void *src, size_t n) {
+#ifdef __TEST__
+  printf("kilb: string: memmove\n");
+#endif
   if (n == 0) return dst;
   char *d = (char *)dst;
   const char *s = (const char *)src;
@@ -81,6 +105,9 @@ void *memmove(void *dst, const void *src, size_t n) {
 }
 
 void *memcpy(void *out, const void *in, size_t n) {
+#ifdef __TEST__
+  printf("kilb: string: memcpy\n");
+#endif
   if (n == 0) return out;
   char *d = (char *)out;
   const char *s = (const char *)in;
@@ -90,6 +117,9 @@ void *memcpy(void *out, const void *in, size_t n) {
 }
 
 int memcmp(const void *s1, const void *s2, size_t n) {
+#ifdef __TEST__
+  printf("kilb: string: memcmp\n");
+#endif
   const unsigned char *p1 = (const unsigned char *)s1;
   const unsigned char *p2 = (const unsigned char *)s2;
   for (size_t i = 0; i < n; i++) {
