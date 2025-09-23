@@ -10,7 +10,7 @@ extern "C" {
 #endif
 
 #define __NATIVE_USE_KLIB__ // Annotate this line of code to use glibc.
-#define __TEST__ // Annotate this line to disable debugging information output.
+// #define __TEST__ // Annotate this line to disable debugging information output.
 
 // string.h
 void  *memset    (void *s, int c, size_t n);

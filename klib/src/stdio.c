@@ -142,6 +142,14 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
         break;
       }
       case 'f': {
+        
+// Floating-point support (%f format specifier) has been disabled due to
+// linking errors with soft-float libraries in RISC-V 32-bit architecture.
+// The RISC-V 32-bit NEMU environment requires soft-float implementations
+// for double-precision operations (functions like __ltdf2, __adddf3, __muldf3),
+// but these libraries are not available in the current toolchain configuration.
+
+        /*
         double num = va_arg(ap, double);
 
         char buf[32];
@@ -168,6 +176,7 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
         buf[i] = '\0';
         char *str = buf;
         while(*str) {*out++ = *str++; cnt++;}
+        */
         break;
       }
       case 'x': {
