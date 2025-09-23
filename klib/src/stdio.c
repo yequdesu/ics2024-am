@@ -16,7 +16,17 @@ int printf(const char *fmt, ...) {
     switch(*fmt) {
       case 'd': {
         int n = va_arg(ap, int);
-        if(n < 0) { putch('-'); cnt++; n = -n; }
+        if(n < 0) {
+          // if(n == (int)0x80000000) {
+          //   char *str = "-2147483648";
+          //   putstr(str);
+          //   cnt += 11;
+          //   break;
+          // }
+          putch('-');
+          cnt++;
+          n = -n; // may cause overflow?: -2147483648 -> 2147483648(overflow!)
+        }
         if(n == 0) { putch('0'); cnt++; }
         else {
           char buf[16];
@@ -38,6 +48,60 @@ int printf(const char *fmt, ...) {
         cnt++;
         break;
       }
+      case 'f': {
+        double num = va_arg(ap, double);
+
+        char buf[32];
+        int i = 0;
+        if (num < 0) { buf[i++] = '-'; num = -num; }
+        int num_int = (int)num;
+        double frac = num - num_int;
+        frac += 0.0000005;
+        if (num_int == 0) {
+            buf[i++] = '0';
+        } else {
+            char temp[16];
+            int j = 0;
+            while (num_int > 0) { temp[j++] = '0' + (num_int % 10); num_int /= 10; }
+            for (int k = j - 1; k >= 0; k--) { buf[i++] = temp[k]; }
+        }
+        buf[i++] = '.';
+        for (int k = 0; k < 6; k++) {
+            frac *= 10;
+            int digit = (int)frac;
+            buf[i++] = '0' + digit;
+            frac -= digit;
+        }
+        buf[i] = '\0';
+        putstr(buf);
+        break;
+      }
+      case 'x': {
+          unsigned int num = va_arg(ap, unsigned int);
+          char buf[16];
+          int i = 0;
+          if (num == 0) { putch('0'); break; }
+          while (num > 0) {
+              int rmd = num % 16;
+              if (rmd < 10) {
+                  buf[i++] = '0' + rmd;
+              } else {
+                  buf[i++] = 'a' + (rmd - 10);
+              }
+              num /= 16;
+          }
+          
+          for (int j = 0; j < i / 2; j++) {
+              char temp = buf[j];
+              buf[j] = buf[i - j - 1];
+              buf[i - j - 1] = temp;
+          }
+          
+          buf[i] = '\0';
+          putstr(buf);
+          break;
+      }
+
       case '%': {
         putch('%');
         cnt++;
@@ -57,7 +121,7 @@ int printf(const char *fmt, ...) {
 
 int vsprintf(char *out, const char *fmt, va_list ap) {
 #ifdef __TEST__
-  printf("kilb: stdio: vsprintf\n");
+  putstr("kilb: stdio: vsprintf\n");
 #endif
   int cnt = 0;
   for(; *fmt != '\0'; fmt++) {
@@ -77,13 +141,67 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
         }
         break;
       }
+      case 'f': {
+        double num = va_arg(ap, double);
+
+        char buf[32];
+        int i = 0;
+        if (num < 0) { buf[i++] = '-'; num = -num; }
+        int num_int = (int)num;
+        double frac = num - num_int;
+        frac += 0.0000005;
+        if (num_int == 0) {
+            buf[i++] = '0';
+        } else {
+            char temp[16];
+            int j = 0;
+            while (num_int > 0) { temp[j++] = '0' + (num_int % 10); num_int /= 10; }
+            for (int k = j - 1; k >= 0; k--) { buf[i++] = temp[k]; }
+        }
+        buf[i++] = '.';
+        for (int k = 0; k < 6; k++) {
+            frac *= 10;
+            int digit = (int)frac;
+            buf[i++] = '0' + digit;
+            frac -= digit;
+        }
+        buf[i] = '\0';
+        char *str = buf;
+        while(*str) {*out++ = *str++; cnt++;}
+        break;
+      }
+      case 'x': {
+          unsigned int num = va_arg(ap, unsigned int);
+          char buf[16];
+          int i = 0;
+          if (num == 0) { *out++ = '0'; cnt++; break; }
+          while (num > 0) {
+              int rmd = num % 16;
+              if (rmd < 10) {
+                  buf[i++] = '0' + rmd;
+              } else {
+                  buf[i++] = 'a' + (rmd - 10);
+              }
+              num /= 16;
+          }
+          
+          for (int j = 0; j < i / 2; j++) {
+              char temp = buf[j];
+              buf[j] = buf[i - j - 1];
+              buf[i - j - 1] = temp;
+          }
+          buf[i] = '\0';
+          char *str = buf;
+          while(*str) {*out++ = *str++; cnt++;}
+          break;
+      }
       case 's': {
         char *str = va_arg(ap, char*);
         while(*str) {*out++ = *str++; cnt++;}
         break;
       }
       case 'c': {
-        char c = (char)va_arg(ap, int);*out++ = c;cnt++;
+        char c = (char)va_arg(ap, int); *out++ = c; cnt++;
         break;
       }
       case '%': {
@@ -104,7 +222,7 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
 
 int sprintf(char *out, const char *fmt, ...) {
 #ifdef __TEST__
-  printf("kilb: stdio: sprintf\n");
+  putstr("kilb: stdio: sprintf\n");
 #endif
   va_list ap;
   va_start(ap, fmt);
@@ -116,7 +234,7 @@ int sprintf(char *out, const char *fmt, ...) {
 
 int snprintf(char *out, size_t n, const char *fmt, ...) {
 #ifdef __TEST__
-  printf("kilb: stdio: printf\n");
+  putstr("kilb: stdio: printf\n");
 #endif
   va_list ap;
   va_start(ap, fmt);
@@ -128,55 +246,123 @@ int snprintf(char *out, size_t n, const char *fmt, ...) {
   
 int vsnprintf(char *out, size_t n, const char *fmt, va_list ap) {
 #ifdef __TEST__
-  printf("kilb: stdio: vsnprintf\n");
+  putstr("kilb: stdio: vsnprintf\n");
 #endif
   if (n == 0) return 0;
-  va_list ap_len;
-  va_copy(ap_len, ap);
-  int total_len = 0;
-  for (const char *p = fmt; *p != '\0'; p++) {
-    if (*p != '%') { total_len++; continue; }
-    p++;
-    switch (*p) {
+  
+  size_t out_index = 0;
+  for(; *fmt != '\0' && out_index < n - 1; fmt++) {
+    if(*fmt != '%') { out[out_index++] = *fmt; continue; }
+    
+    fmt++;
+    if(*fmt == '\0') break;
+    
+    switch(*fmt) {
       case 'd': {
-        int num = va_arg(ap_len, int);
-        if (num < 0) total_len++;
-        if (num == 0) { total_len++; }
-        else { while (num > 0) { total_len++; num /= 10; } }
+        int num = va_arg(ap, int);
+        char buf[16];
+        int i = 0;
+        if(num < 0) {
+          if(out_index < n - 1) out[out_index++] = '-';
+          num = -num;
+        }
+        if(num == 0) {
+          if(out_index < n - 1) out[out_index++] = '0';
+        } else {
+          while(num > 0) {
+            buf[i++] = '0' + (num % 10);
+            num /= 10;
+          }
+          while(i > 0 && out_index < n - 1) {
+            out[out_index++] = buf[--i];
+          }
+        }
         break;
+      }
+      case 'x': {
+        unsigned int num = va_arg(ap, unsigned int);
+        char buf[16];
+        int i = 0;
+        if(num == 0) {
+          if(out_index < n - 1) out[out_index++] = '0';
+        } else {
+          while(num > 0) {
+            int rmd = num % 16;
+            buf[i++] = (rmd < 10) ? ('0' + rmd) : ('a' + rmd - 10);
+            num /= 16;
+          }
+          while(i > 0 && out_index < n - 1) {
+            out[out_index++] = buf[--i];
+          }
         }
-       case 's': {
-        char *str = va_arg(ap_len, char*);
-        while (*str != '\0') { total_len++; str++; }
         break;
+      }
+      case 'f': {
+        double num = va_arg(ap, double);
+        char buf[32];
+        int i = 0;
+        
+        if(num < 0) {
+          if(out_index < n - 1) out[out_index++] = '-';
+          num = -num;
         }
-        case 'c': {
-          total_len++;
-          break;
+        int num_int = (int)num;
+        double frac = num - num_int;
+        frac += 0.0000005;
+        if(num_int == 0) {
+          buf[i++] = '0';
+        } else {
+          char temp[16];
+          int j = 0;
+          while(num_int > 0) {
+            temp[j++] = '0' + (num_int % 10);
+            num_int /= 10;
+          }
+          for(int k = j - 1; k >= 0; k--) {
+            buf[i++] = temp[k];
+          }
         }
-        case '%': {
-          total_len++;
-          break;
+        buf[i++] = '.';
+        for(int k = 0; k < 6; k++) {
+          frac *= 10;
+          int digit = (int)frac;
+          buf[i++] = '0' + digit;
+          frac -= digit;
         }
-        default: { total_len += 2; break; }
+        buf[i] = '\0';
+        char *str = buf;
+        while(*str && out_index < n - 1) {
+          out[out_index++] = *str++;
+        }
+        break;
+      }
+      case 's': {
+        char *str = va_arg(ap, char*);
+        while(*str && out_index < n - 1) {
+          out[out_index++] = *str++;
+        }
+        break;
+      }
+      case 'c': {
+        char c = (char)va_arg(ap, int);
+        if(out_index < n - 1) out[out_index++] = c;
+        break;
+      }
+      case '%': {
+        if(out_index < n - 1) out[out_index++] = '%';
+        break;
+      }
+      default: {
+        if(out_index < n - 1) out[out_index++] = '%';
+        if(out_index < n - 1) out[out_index++] = *fmt;
+        break;
       }
     }
-    va_end(ap_len);
-
-    if (n > (size_t)total_len) {
-        return vsprintf(out, fmt, ap);
-    }
-    
-    char *temp = (char*)malloc(total_len + 1);
-    if (temp == NULL) { return -1; }
-
-    int result = vsprintf(temp, fmt, ap);
-    strncpy(out, temp, n - 1);
-    out[n - 1] = '\0';
-    
-    free(temp);
-    return result;
+  }
+  out[out_index] = '\0';
+  return out_index;
   // panic("Not implemented");
 }
+
 
 #endif
