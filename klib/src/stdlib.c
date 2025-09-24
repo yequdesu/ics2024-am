@@ -42,6 +42,8 @@ int atoi(const char* nptr) {
   return x;
 }
 
+char *brk = NULL;
+
 void *malloc(size_t size) {
 #ifdef __TEST__
   putstr("kilb: stdlib: malloc\n");
@@ -50,7 +52,19 @@ void *malloc(size_t size) {
   // Therefore do not call panic() here, else it will yield a dead recursion:
   //   panic() -> putchar() -> (glibc) -> malloc() -> panic()
 #if !(defined(__ISA_NATIVE__) && defined(__NATIVE_USE_KLIB__))
-  panic("Not implemented");
+  if(brk == NULL) brk = (void *)ROUNDUP(heap.start, 8);
+
+  size = (size_t)ROUNDUP(size, 8);
+  char *old = brk;
+  brk += size;
+
+  assert((uintptr_t)heap.start <= (uintptr_t)brk && (uintptr_t)brk < (uintptr_t)heap.end);
+  for (uint64_t *p = (uint64_t *)old; p != (uint64_t *)brk; p ++) {
+    *p = 0;
+  }
+
+  return old;
+  // panic("Not implemented");
 #endif
   return NULL;
 }

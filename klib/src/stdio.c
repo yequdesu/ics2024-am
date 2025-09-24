@@ -49,31 +49,31 @@ int printf(const char *fmt, ...) {
         break;
       }
       case 'f': {
-        double num = va_arg(ap, double);
+//        double num = va_arg(ap, double);
 
-        char buf[32];
-        int i = 0;
-        if (num < 0) { buf[i++] = '-'; num = -num; }
-        int num_int = (int)num;
-        double frac = num - num_int;
-        frac += 0.0000005;
-        if (num_int == 0) {
-            buf[i++] = '0';
-        } else {
-            char temp[16];
-            int j = 0;
-            while (num_int > 0) { temp[j++] = '0' + (num_int % 10); num_int /= 10; }
-            for (int k = j - 1; k >= 0; k--) { buf[i++] = temp[k]; }
-        }
-        buf[i++] = '.';
-        for (int k = 0; k < 6; k++) {
-            frac *= 10;
-            int digit = (int)frac;
-            buf[i++] = '0' + digit;
-            frac -= digit;
-        }
-        buf[i] = '\0';
-        putstr(buf);
+//        char buf[32];
+//        int i = 0;
+//        if (num < 0) { buf[i++] = '-'; num = -num; }
+//        int num_int = (int)num;
+//        double frac = num - num_int;
+//        frac += 0.0000005;
+//        if (num_int == 0) {
+//            buf[i++] = '0';
+//        } else {
+//            char temp[16];
+//            int j = 0;
+//            while (num_int > 0) { temp[j++] = '0' + (num_int % 10); num_int /= 10; }
+//            for (int k = j - 1; k >= 0; k--) { buf[i++] = temp[k]; }
+//        }
+//        buf[i++] = '.';
+//        for (int k = 0; k < 6; k++) {
+//            frac *= 10;
+//            int digit = (int)frac;
+//            buf[i++] = '0' + digit;
+//            frac -= digit;
+//        }
+//        buf[i] = '\0';
+//        putstr(buf);
         break;
       }
       case 'x': {
