@@ -100,7 +100,15 @@ $(DST_DIR)/%.o: %.c
 	@mkdir -p $(dir $@) && echo + CC $<
 	@$(CC) -std=gnu11 $(CFLAGS) -c -o $@ $(realpath $<)
 
-### Rule (compile): a single `.cc` -> `.o` (g++)
+### Rule (compile): a single `.c` -> `.i` (gcc)
+$(DST_DIR)/%.i: %.c
+	@mkdir -p $(dir $@) && $(CC) -E $(CFLAGS) $< -o $@
+
+### (new) Rule (compile): a single `.c` -> `.s` (gcc)
+$(DST_DIR)/%.s: %.c
+	@mkdir -p $(dir $@) && $(CC) -S -fverbose-asm $(CFLAGS) $< -o $@
+
+### (new) Rule (compile): a single `.cc` -> `.o` (g++)
 $(DST_DIR)/%.o: %.cc
 	@mkdir -p $(dir $@) && echo + CXX $<
 	@$(CXX) -std=c++17 $(CXXFLAGS) -c -o $@ $(realpath $<)
@@ -168,3 +176,10 @@ clean-all: $(CLEAN_ALL) clean
 $(CLEAN_ALL):
 	-@$(MAKE) -s -C $@ clean
 .PHONY: clean-all $(CLEAN_ALL)
+
+### (new)
+### Generate all preprocess files
+preprocess: $(addprefix $(DST_DIR)/, $(addsuffix .i, $(basename $(filter %.c, $(SRCS)))))
+### Generate all assembly files
+assembly: $(addprefix $(DST_DIR)/, $(addsuffix .s, $(basename $(filter %.c, $(SRCS)))))
+.PHONY: preprocess assembly
