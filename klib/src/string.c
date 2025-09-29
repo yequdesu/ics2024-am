@@ -79,9 +79,10 @@ void *memset(void *s, int c, size_t n) {
 #ifdef __TEST__
   putstr("kilb: string: memset\n");
 #endif
+  if(s == NULL) return s;
   unsigned char *ptr = (unsigned char *)s;
   unsigned char value = (unsigned char)c;
-  for (size_t i = 0; i < n; i++) {ptr[i] = value;}
+  for (size_t i = 0; i < n; i++) { ptr[i] = value; }
   return s;
   // panic("Not implemented");
 }
